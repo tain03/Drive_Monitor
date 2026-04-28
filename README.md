@@ -1,52 +1,52 @@
 # Drive Health Monitor
 
-Mot ung dung Windows don gian de theo doi suc khoe o cung, tu dong thu thap du lieu tu CrystalDiskInfo va xuat ra file CSV moi 5 phut.
+Một ứng dụng Windows đơn giản để theo dõi sức khỏe ổ cứng, tự động thu thập dữ liệu từ CrystalDiskInfo và xuất ra file CSV mỗi 5 phút.
 
-## Cac tinh nang chinh
+## Các tính năng chính
 
-- Chay ngam duoi khay he thong (System Tray).
-- Tu dong chay cung Windows (Startup).
-- Giao dien GUI don gian voi bo dem nguoc thoi gian.
-- Tu dong thu thap thong so SMART, nhiet do va thoi gian su dung o cung.
-- Xuat bao cao dinh dang CSV theo ngay (Hard_drive_summary_YYYYMMDD.csv).
+- Chạy ngầm dưới khay hệ thống (System Tray).
+- Tự động chạy cùng Windows (Startup).
+- Giao diện GUI đơn giản với bộ đếm ngược thời gian.
+- Tự động thu thập thông số SMART, nhiệt độ và thời gian sử dụng ổ cứng.
+- Xuất báo cáo định dạng CSV theo ngày (Hard_drive_summary_YYYYMMDD.csv).
 
-## Yeu cau he thong
+## Yêu cầu hệ thống
 
-- Windows 10 hoac 11.
-- Quyen Administrator (de doc thong so SMART).
-- CrystalDiskInfo (DiskInfo64.exe) phai nam cung thu muc voi chuong trinh.
+- Windows 10 hoặc 11.
+- Quyền Administrator (để đọc thông số SMART).
+- CrystalDiskInfo (DiskInfo64.exe) phải nằm cùng thư mục với chương trình.
 
-## Huong dan cai dat nhanh
+## Hướng dẫn cài đặt nhanh
 
-1. Tai ve va giai nen goi DriveMonitor.
-2. Nhap dup chuot vao file `install.bat`.
-3. Chuong trinh se tu dong:
-   - Copy vao thu muc `C:\DriveMonitor`.
-   - Dang ky khoi dong cung Windows.
-   - Kich hoat ung dung ngay lap tuc.
+1. Tải về và giải nén gói DriveMonitor.
+2. Nhấp đúp chuột vào file `install.bat`.
+3. Chương trình sẽ tự động:
+   - Copy vào thư mục `C:\DriveMonitor`.
+   - Đăng ký khởi động cùng Windows.
+   - Kích hoạt ứng dụng ngay lập tức.
 
-## Cau hinh (config.json)
+## Cấu hình (config.json)
 
-Ban co the tuy chinh cac thong so sau trong file `config.json`:
+Bạn có thể tùy chỉnh các thông số sau trong file `config.json`:
 
-- `Process`: Ten tien trinh hoac du an.
-- `Machine`: Ten may tram hoac server.
-- `PC`: Ten may tinh (neu de trong se tu dong lay theo Windows).
-- `IP`: Dia chi IP (neu de trong se tu dong lay IP cua may).
-- `OutputPath`: Duong dan thu muc luu file CSV (neu de trong se luu tai thu muc cai dat).
+- `Process`: Tên tiến trình hoặc dự án.
+- `Machine`: Tên máy trạm hoặc server.
+- `PC`: Tên máy tính (nếu để trống sẽ tự động lấy theo Windows).
+- `IP`: Địa chỉ IP (nếu để trống sẽ tự động lấy IP của máy).
+- `OutputPath`: Đường dẫn thư mục lưu file CSV (nếu để trống sẽ lưu tại thư mục cài đặt).
 
-## Huong dan cho lap trinh vien
+## Hướng dẫn cho lập trình viên
 
-### Yeu cau moi truong
+### Yêu cầu môi trường
 - Python 3.12+
-- Thu vien: `pystray`, `Pillow`
+- Thư viện: `pystray`, `Pillow`
 
-### Dong goi ung dung
-Su dung PyInstaller de tao file EXE duy nhat:
+### Đóng gói ứng dụng
+Sử dụng PyInstaller để tạo file EXE duy nhất:
 
 ```bash
 pyinstaller --noconsole --onefile --uac-admin --name DriveMonitor drive_monitor_gui.py
 ```
 
-## Luu y
-Chuong trinh nay su dung du lieu tu CrystalDiskInfo bang cach goi lenh `/CopyExit`. Dam bao file `DiskInfo64.exe` va thu muc `CdiResource` luon hien dien cung cap voi file thuc thi.
+## Lưu ý
+Chương trình này sử dụng dữ liệu từ CrystalDiskInfo bằng cách gọi lệnh `/CopyExit`. Đảm bảo file `DiskInfo64.exe` và thư mục `CdiResource` luôn hiện diện cùng cấp với file thực thi.
