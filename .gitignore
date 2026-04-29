@@ -31,7 +31,7 @@ DiskInfo.txt
 DiskInfo.ini
 Smart/
 app_error.log
-Hard_drive_summary*.csv
+*_Hard_drive_summary.csv
 
 # Packaging folders
 Package/

@@ -62,8 +62,10 @@ def load_config():
         config = {
             "Process": "DefaultProcess",
             "Machine": "DefaultMachine",
+            "Model": "DefaultModel",
             "PC": socket.gethostname(),
             "IP": "",
+            "LotID": "000000000000",
             "OutputPath": ""
         }
         with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
@@ -147,7 +149,9 @@ def run_cdi_and_parse():
                 if current_drive: drives.append(current_drive)
                 current_drive = {'Model': line.split(':', 1)[1].strip()}
             elif line.startswith('Serial Number :'): current_drive['Serial Number'] = line.split(':', 1)[1].strip()
-            elif line.startswith('Disk Size :'): current_drive['Capacity'] = line.split(':', 1)[1].strip().split('(')[0].strip()
+            elif line.startswith('Disk Size :'):
+                val = line.split(':', 1)[1].strip().split('(')[0].strip()
+                current_drive['Capacity'] = val.replace('GB', '').strip()
             elif line.startswith('Rotation Rate :'):
                 val = line.split(':', 1)[1].strip()
                 current_drive['Drive Type'] = 'SSD' if 'SSD' in val else ('HDD' if 'RPM' in val else val)
@@ -158,10 +162,10 @@ def run_cdi_and_parse():
                 if '(' in val:
                     status, pct = val.split('(')
                     current_drive['Health Status'] = status.strip()
-                    current_drive['Health Percentage'] = pct.replace(')', '').strip()
+                    current_drive['Health Percentage'] = pct.replace(')', '').replace('%', '').strip()
                 else:
                     current_drive['Health Status'] = val
-                    current_drive['Health Percentage'] = '100 %' if 'Good' in val else 'N/A'
+                    current_drive['Health Percentage'] = '100' if 'Good' in val else 'N/A'
             elif line.startswith('Drive Letter :'): current_drive['Drive Letter'] = line.split(':', 1)[1].strip()
         
         if current_drive: drives.append(current_drive)
@@ -180,14 +184,14 @@ def calculate_free_space(drive_letters_str):
                 total_free += shutil.disk_usage(l + '\\').free
                 count += 1
             except: pass
-    return f"{total_free / (1024**3):.1f} GB" if count > 0 else "N/A"
+    return f"{total_free / (1024**3):.1f}" if count > 0 else "N/A"
 
 # --- GUI Application ---
 class DriveMonitorApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Drive Health Monitor")
-        self.root.geometry("400x450")
+        self.root.geometry("500x480")
         self.root.protocol('WM_DELETE_WINDOW', self.hide_window)
         
         self.config = load_config()
@@ -213,6 +217,7 @@ class DriveMonitorApp:
         ttk.Label(main_frame, text="Hard Drive Monitoring System", style="Header.TLabel").pack(pady=(0, 20))
 
         fields = [
+            ("Model:", "Model"),
             ("Process:", "Process"),
             ("Machine:", "Machine"),
             ("PC:", "PC"),
@@ -223,10 +228,10 @@ class DriveMonitorApp:
         self.labels = {}
         for text, key in fields:
             f = ttk.Frame(main_frame)
-            f.pack(fill=tk.X, pady=5)
+            f.pack(fill=tk.X, pady=3)
             ttk.Label(f, text=text, width=15, anchor=tk.W).pack(side=tk.LEFT)
-            lbl = ttk.Label(f, text="Loading...", font=("Segoe UI", 10, "bold"))
-            lbl.pack(side=tk.LEFT)
+            lbl = ttk.Label(f, text="Loading...", font=("Segoe UI", 10, "bold"), wraplength=300)
+            lbl.pack(side=tk.LEFT, fill=tk.X, expand=True)
             self.labels[key] = lbl
 
         ttk.Separator(main_frame, orient=tk.HORIZONTAL).pack(fill=tk.X, pady=20)
@@ -241,6 +246,7 @@ class DriveMonitorApp:
         self.config = load_config()
         ip = self.config.get("IP", "").strip() or get_local_ip()
         
+        self.labels["Model"].config(text=self.config.get("Model", "N/A"))
         self.labels["Process"].config(text=self.config.get("Process", "N/A"))
         self.labels["Machine"].config(text=self.config.get("Machine", "N/A"))
         self.labels["PC"].config(text=self.config.get("PC", socket.gethostname()))
@@ -271,7 +277,8 @@ class DriveMonitorApp:
         now = datetime.now()
         
         output_dir = config.get("OutputPath", "").strip()
-        filename = f'Hard_drive_summary_{now.strftime("%Y%m%d")}.csv'
+        lot_id = config.get("LotID", "000000000000").strip()
+        filename = f"{lot_id}_{now.strftime('%Y%m%d')}_Hard_drive_summary.csv"
         
         if output_dir:
             try:
@@ -283,7 +290,7 @@ class DriveMonitorApp:
         else:
             output_path = os.path.join(BASE_PATH, filename)
         
-        headers = ["Time", "Date", "Process", "Machine", "PC", "IP", "Boot Time", "CPU Usage (%)", "Drive Type", "Model", "Serial Number", "Drive Letter", "Capacity", "Free Space", "Health Status", "Health Percentage", "Temperature (C)", "Power On Hours"]
+        headers = ["Time", "Process", "Machine", "PC", "IP", "Model", "Boot Time", "CPU Usage (%)", "Drive Type", "Drive Model", "Serial Number", "Drive Letter", "Capacity(GB)", "Free Space(GB)", "Health Percentage (%)", "Temperature (C)", "Power On Hours"]
         
         try:
             file_exists = os.path.isfile(output_path)
@@ -296,22 +303,21 @@ class DriveMonitorApp:
                 
                 for d in drives:
                     row = {
-                        "Time": now.strftime("%H:%M:%S"),
-                        "Date": now.strftime("%Y-%m-%d"),
+                        "Time": now.strftime("%Y-%m-%d %H:%M:%S"),
                         "Process": config.get("Process", ""),
                         "Machine": config.get("Machine", ""),
                         "PC": config.get("PC", ""),
                         "IP": ip,
+                        "Model": config.get("Model", ""),
                         "Boot Time": boot,
                         "CPU Usage (%)": cpu,
                         "Drive Type": d.get("Drive Type", "N/A"),
-                        "Model": d.get("Model", "N/A"),
+                        "Drive Model": d.get("Model", "N/A"),
                         "Serial Number": d.get("Serial Number", "N/A"),
                         "Drive Letter": d.get("Drive Letter", ""),
-                        "Capacity": d.get("Capacity", "N/A"),
-                        "Free Space": calculate_free_space(d.get("Drive Letter", "")),
-                        "Health Status": d.get("Health Status", "N/A"),
-                        "Health Percentage": d.get("Health Percentage", "N/A"),
+                        "Capacity(GB)": d.get("Capacity", "N/A"),
+                        "Free Space(GB)": calculate_free_space(d.get("Drive Letter", "")),
+                        "Health Percentage (%)": d.get("Health Percentage", "N/A"),
                         "Temperature (C)": d.get("Temperature (C)", "N/A"),
                         "Power On Hours": d.get("Power On Hours", "N/A")
                     }

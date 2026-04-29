@@ -31,9 +31,13 @@ Bạn có thể tùy chỉnh các thông số sau trong file `config.json`:
 
 - `Process`: Tên tiến trình hoặc dự án.
 - `Machine`: Tên máy trạm hoặc server.
+- `Model`: Model thiết bị hoặc thông tin định danh máy.
 - `PC`: Tên máy tính (nếu để trống sẽ tự động lấy theo Windows).
 - `IP`: Địa chỉ IP (nếu để trống sẽ tự động lấy IP của máy).
+- `LotID`: Mã số Lot (12 ký tự), dùng để đặt tên file.
 - `OutputPath`: Đường dẫn thư mục lưu file CSV (nếu để trống sẽ lưu tại thư mục cài đặt).
+
+Tên file xuất ra sẽ tuân theo quy tắc: `LotID_yyyymmdd_Hard_drive_summary.csv`
 
 ## Hướng dẫn cho lập trình viên
 
